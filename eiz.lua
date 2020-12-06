@@ -8,6 +8,13 @@ local output_dir = arg[2]
 -- sloupec, kde začínají katedry
 local katedry_start = 5
 
+local category_names = {
+"Licencovaný zdroj",
+"Volně dostupný zdroj",
+"Zkušební přístup"
+}
+
+
 
 local function load_table(input)
   local lo,msg  = xlsx.load(input)
@@ -49,7 +56,7 @@ local function get_katedry(sheet)
   return katedry
 end
 
-local function get_eiz(sheet, katedry)
+local function get_eiz(sheet)
   local zdroje = {}
   for i= 2, #sheet do 
     local row = sheet[i]
@@ -68,7 +75,39 @@ local function get_eiz(sheet, katedry)
   return zdroje
 end
 
+local function sort_eiz(zdroje)
+  local categories = {}
+  -- nejdřív zdroje setřídíme podle abecedy
+  table.sort(zdroje, function(a,b) return a.name < b.name end)
+  for _, zdroj in ipairs(zdroje) do
+    local cat_name = zdroj.category
+    category = categories[cat_name] or {}
+    table.insert(category, zdroj)
+    categories[cat_name] = category
+  end
+  return categories
+end
+
+local function save_eiz(katedry, categories)
+  for i, katedra in pairs(katedry) do
+    print("*******************")
+    print(katedra.name)
+    for _, name in ipairs(category_names) do
+      print("====================")
+      print(name)
+      local current = categories[name]
+      for _, zdroj in ipairs(current) do
+        if zdroj.katedry[i] then
+          print("",zdroj.name)
+        end
+      end
+    end
+  end
+end
+
 local sheet = load_table(input)
 local katedry = get_katedry(sheet)
-local zdroje = get_eiz(sheet, katedry)
+local zdroje = get_eiz(sheet)
+local categories = sort_eiz(zdroje)
+save_eiz(katedry, categories)
 
