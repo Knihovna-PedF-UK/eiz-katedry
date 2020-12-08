@@ -1,9 +1,10 @@
+local lustache = require "lustache"
 kpse.set_program_name "luatex"
 local xlsx = require "spreadsheet.spreadsheet-xlsx-reader"
 local log = require "spreadsheet.spreadsheet-log"
 log.level = "warn"
 local input = arg[1]
-local output_dir = arg[2]
+local output_dir = arg[2] or "out"
 
 -- sloupec, kde začínají katedry
 local katedry_start = 5
@@ -13,6 +14,34 @@ local category_names = {
 "Volně dostupný zdroj",
 "Zkušební přístup"
 }
+
+local template = [[
+---
+title: {{name}} – elektronické informační zdroje
+---
+<h1>{{fullname}}</h1>
+{{#sources}}
+<h2>{{name}}</h2>
+<ul>
+{{#entries}}
+<li><a href="{{link}}">{{name}}</a> – {{description}}</li>
+{{/entries}}
+</ul>
+{{/sources}}
+]]
+
+local index_tpl = [[
+---
+title: Elektronické informační zdroje pro katedry
+---
+<h1>Elektronické informační zdroje pro katedry</h1>
+<ul>
+{{#katedry}}
+<li><a href="{{filename}}">{{fullname}}</a></li>
+{{/katedry}}
+</ul>
+]]
+
 
 
 
@@ -102,21 +131,75 @@ local function sort_eiz(zdroje)
   return categories
 end
 
+local lower = unicode.utf8.lower
+local gmatch = unicode.utf8.gmatch
+local function detox(str)
+  local replace = {["č"]="c", ["š"] = "s"}
+  local str = lower(str)
+  local t = {}
+  for c in gmatch(str, ".") do 
+    t[#t+1] = replace[c] or c
+  end
+  return table.concat(t)
+end
+
+local used_names = {}
+
+local function make_output_name(name)
+  local filename = output_dir .. "/eiz-" .. detox(name) .. ".html"
+  return filename:gsub("/+", "/") -- normalizovat cesty
+end
+
+local function save_katedra(katedra, text)
+  local filename = make_output_name(katedra.name)
+  -- ulozit jmeno HTML souboru, ale bez adresare 
+  katedra.filename = filename:gsub("^[^%/]+/", "")
+  -- testovat, jestli neexistuje kolize jmen
+  if used_names[filename] then
+    print("error: filename " .. filename .. "already exists")
+  end
+  used_names[filename] = true
+  local f = io.open(filename, "w")
+  print("saving", filename)
+  f:write(text)
+  f:close()
+end
+
 local function save_eiz(katedry, categories)
   for i, katedra in pairs(katedry) do
-    print("*******************")
-    print(katedra.fullname)
+    -- ziskat zdroje dostupne pro katedru
+    katedra.sources = {}
+    -- zpracovat jednotlive kategorie zdroju
     for _, name in ipairs(category_names) do
-      print("====================")
-      print(name)
+      -- ulozit dostupne zdroje do nove tabulky
       local current = categories[name]
+      local t = {}
       for _, zdroj in ipairs(current) do
         if zdroj.katedry[i] then
-          print("",zdroj.name)
+          t[#t+1] = zdroj
         end
       end
+      -- pokud ma katedra nejake zdroje dane kategorie, ulozit 
+      if #t > 0 then
+        table.insert(katedra.sources, {name = name, entries = t})
+      end
     end
+    -- zobrazit zdroj
+    save_katedra(katedra, lustache:render(template, katedra))
   end
+end
+
+local function save_index(katedry)
+  local filename = make_output_name("katedry")
+  local f = io.open(filename, "w")
+  local t = {katedry = {}}
+  -- katedry nezacinaji od nuly, musime to pole preindexovat
+  for k,v in pairs(katedry.katedry) do
+    table.insert(t.katedry, v)
+  end
+  local text = lustache:render(index_tpl, t)
+  f:write(text)
+  f:close()
 end
 
 local sheet, xlsx_file = load_table(input)
@@ -125,4 +208,5 @@ get_katedry_names(katedry, xlsx_file)
 local zdroje = get_eiz(sheet)
 local categories = sort_eiz(zdroje)
 save_eiz(katedry, categories)
+save_index({katedry = katedry}) -- trik aby fungovala šablona. potřebuje asociativní pole
 
