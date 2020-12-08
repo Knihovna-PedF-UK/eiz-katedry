@@ -23,7 +23,7 @@ local function load_table(input)
     os.exit()
   end
   local sheet = lo:get_sheet(1)
-  return sheet.table
+  return sheet.table, lo
 end
 
 local function get_cell_value(cell)
@@ -52,6 +52,20 @@ local function get_katedry(sheet)
     if value then
       katedry[i] = {name = value, databases = {}}
     end
+  end
+  return katedry
+end
+
+local function get_katedry_names(katedry, xlsx_file)
+  -- načíst jména kateder z druhého listu
+  local katedry_sheet = xlsx_file:get_sheet(2)
+  local t = {}
+  for k, v in ipairs(katedry_sheet.table) do
+    -- ulož mapování mezi zkratkou katedry a jejím jménem
+    t[get_cell_value(v[1])] = get_cell_value(v[2])
+  end
+  for _, katedra in pairs(katedry) do
+    katedra.fullname =  t[katedra.name]
   end
   return katedry
 end
@@ -91,7 +105,7 @@ end
 local function save_eiz(katedry, categories)
   for i, katedra in pairs(katedry) do
     print("*******************")
-    print(katedra.name)
+    print(katedra.fullname)
     for _, name in ipairs(category_names) do
       print("====================")
       print(name)
@@ -105,8 +119,9 @@ local function save_eiz(katedry, categories)
   end
 end
 
-local sheet = load_table(input)
+local sheet, xlsx_file = load_table(input)
 local katedry = get_katedry(sheet)
+get_katedry_names(katedry, xlsx_file)
 local zdroje = get_eiz(sheet)
 local categories = sort_eiz(zdroje)
 save_eiz(katedry, categories)
