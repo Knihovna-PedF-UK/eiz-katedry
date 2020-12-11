@@ -7,7 +7,7 @@ local input = arg[1]
 local output_dir = arg[2] or "out"
 
 -- sloupec, kde začínají katedry
-local katedry_start = 5
+local katedry_start = 6
 
 local category_names = {
 "Licencovaný zdroj",
@@ -104,10 +104,10 @@ local function get_eiz(sheet)
   for i= 2, #sheet do 
     local row = sheet[i]
     local name = get_cell_value(row[1])
-    local link = get_cell_link(row[1])
-    local description = get_cell_value(row[2])
-    local category = get_cell_value(row[3])
-    local comment = get_cell_value(row[4])
+    local link = get_cell_value(row[2])
+    local description = get_cell_value(row[3])
+    local category = get_cell_value(row[4])
+    local comment = get_cell_value(row[5])
     local object = {name = name, link = link, description = description, category = category, comment = comment, katedry = {}}
     for i = katedry_start, #row do 
       local value = get_cell_value(row[i])
