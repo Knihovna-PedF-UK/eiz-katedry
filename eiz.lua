@@ -18,6 +18,8 @@ local category_names = {
 local template = [[
 ---
 title: {{name}} – elektronické informační zdroje
+img: /img/eiz-{{shortcut}}.jpg
+alt: "{{fullname}}"
 ---
 <h1>{{fullname}}</h1>
 {{#sources}}
@@ -95,6 +97,8 @@ local function get_katedry_names(katedry, xlsx_file)
   end
   for _, katedra in pairs(katedry) do
     katedra.fullname =  t[katedra.name]
+    -- ulož zkratku katerdry v lowercase. využijeme ve jménech obrázků
+    katedra.shortcut  = string.lower(katedra.name)
   end
   return katedry
 end
