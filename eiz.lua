@@ -35,6 +35,8 @@ alt: "{{fullname}}"
 local index_tpl = [[
 ---
 title: Elektronické informační zdroje pro katedry
+img: /img/eiz-portal.jpg
+alt: "EIZ pro katedry"
 ---
 <h1>Elektronické informační zdroje pro katedry</h1>
 <ul>
