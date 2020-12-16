@@ -98,7 +98,7 @@ local function get_katedry_names(katedry, xlsx_file)
   for _, katedra in pairs(katedry) do
     katedra.fullname =  t[katedra.name]
     -- ulož zkratku katerdry v lowercase. využijeme ve jménech obrázků
-    katedra.shortcut  = string.lower(katedra.name)
+    katedra.shortcut  = string.lower(katedra.name:gsub("Č", "c"))
   end
   return katedry
 end
