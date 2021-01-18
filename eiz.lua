@@ -20,6 +20,7 @@ local template = [[
 title: {{name}} – elektronické informační zdroje
 img: /img/eiz-{{shortcut}}.jpg
 alt: "{{fullname}}"
+description: Doporučené elektronické informační zdroje pro {{name}}
 ---
 <h1>{{fullname}}</h1>
 {{#sources}}
@@ -37,8 +38,25 @@ local index_tpl = [[
 title: Elektronické informační zdroje pro katedry
 img: /img/eiz-portal.jpg
 alt: "EIZ pro katedry"
+description: Doporučené elektronické informační zdroje pro jednotlivé katedry PedF UK
 ---
 <h1>Elektronické informační zdroje pro katedry</h1>
+<p>Na této stránce najdete základní e-zdroje, které jsou vhodné pro jednotlivé katedry PedF UK a jsou:</p>
+
+<ol>
+<li>nakupovány z finančních prostředků PedF UK nebo UK</li>
+<li>bezplatně na webu, ale doporučeny pedagogy nebo Knihovnou PedF UK</li>
+</ol>
+
+
+<p>Většinu uvedených zdrojů lze prohledávat až na úroveň článku nebo e-knihy přes vyhledávač elektronických zdrojů <a href="https://ukaz.cuni.cz/">Ukaž</a></p>
+
+<p>Vyhledávání je problematičtější, pokud jde o neplacené zdroje. V tomto případě je vhodné vyhledávat přímo v daném e-zdroji.</p>
+
+<p>Jakékoli dotazy ohledně e-zdrojů rádi zodpovíme v naší online poradně na FB
+knihovny. Stačí napsat zprávu na <a
+href="https://www.facebook.com/knihovnapedfpraha">@knihovnapedfpraha</a>, nebo na e-mail <a href="mailto:knihovna@pedf.cuni.cz">knihovna@pedf.cuni.cz</a></p>
+<h2>Seznam kateder</h2>
 <ul>
 {{#katedry}}
 <li><a href="{{filename}}">{{fullname}}</a></li>
