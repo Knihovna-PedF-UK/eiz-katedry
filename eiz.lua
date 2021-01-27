@@ -142,10 +142,43 @@ local function get_eiz(sheet)
   return zdroje
 end
 
+-- support czech sorting
+-- except ch, it isn't worth the effort
+local abece = " ()-aábcčdďeéěfghiíjklmnňoópqrřsštťuůúvwxyýz"
+
+local abece_codes = {}
+
+-- prepare table for sorting
+for position, codepoint in utf8.codes(abece) do
+  abece_codes[codepoint] = position
+end
+
+-- this is provided by LuaTeX
+local ulower = unicode.utf8.lower
+
+local function abece_sorting(x, y)
+  -- compare lower case "name" fields
+  local a,b = ulower(x.name), ulower(y.name)
+  -- transform strings to table
+  local first ={ utf8.codepoint(a,1, utf8.len(a))}
+  local second ={ utf8.codepoint(b, 1, utf8.len(b))} 
+  for i = 1, math.min(#first, #second) do
+    -- get sort codes for codepoints at the current string positition
+    local a_u = abece_codes[first[i]]  or first[i]
+    local b_u = abece_codes[second[i]]  or second[i]
+    if a_u ~= b_u then return a_u < b_u end
+  end
+  -- if the strings are otherwise identical at the same length,
+  -- the shorter is smaller
+  return #first < #second
+end
+
+
 local function sort_eiz(zdroje)
   local categories = {}
   -- nejdřív zdroje setřídíme podle abecedy
-  table.sort(zdroje, function(a,b) return a.name < b.name end)
+  -- table.sort(zdroje, function(a,b) return a.name < b.name end)
+  table.sort(zdroje, abece_sorting)
   for _, zdroj in ipairs(zdroje) do
     local cat_name = zdroj.category
     category = categories[cat_name] or {}
