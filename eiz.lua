@@ -203,12 +203,14 @@ end
 local used_names = {}
 
 local function make_output_name(name)
+  if not name or name == "" then return nil end
   local filename = output_dir .. "/eiz-" .. detox(name) .. ".html"
   return filename:gsub("/+", "/") -- normalizovat cesty
 end
 
 local function save_katedra(katedra, text)
   local filename = make_output_name(katedra.name)
+  if not filename then return nil end
   -- ulozit jmeno HTML souboru, ale bez adresare 
   katedra.filename = filename:gsub("^[^%/]+/", "")
   -- testovat, jestli neexistuje kolize jmen
@@ -220,6 +222,7 @@ local function save_katedra(katedra, text)
   print("saving", filename)
   f:write(text)
   f:close()
+  return true
 end
 
 local function save_eiz(katedry, categories)
@@ -252,7 +255,9 @@ local function save_index(katedry)
   local t = {katedry = {}}
   -- katedry nezacinaji od nuly, musime to pole preindexovat
   for k,v in pairs(katedry.katedry) do
-    table.insert(t.katedry, v)
+    if v.name and v.name ~="" then
+      table.insert(t.katedry, v)
+    end
   end
   local text = lustache:render(index_tpl, t)
   f:write(text)
